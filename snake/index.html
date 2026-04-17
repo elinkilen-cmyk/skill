@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⭐ Star Snake</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0a0a14;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: system-ui, sans-serif;
+      color: #fff;
+      padding: 16px;
+    }
+
+    h1 {
+      color: #ffd700;
+      font-size: 28px;
+      margin-bottom: 12px;
+      letter-spacing: 1px;
+    }
+
+    #score-bar {
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffd700;
+      margin-bottom: 12px;
+      min-height: 28px;
+    }
+
+    #canvas-wrap {
+      position: relative;
+    }
+
+    canvas {
+      border-radius: 14px;
+      display: block;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.7);
+      max-width: 100%;
+    }
+
+    /* Overlay screens */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(5, 5, 15, 0.85);
+      border-radius: 14px;
+    }
+
+    .overlay .emoji  { font-size: 64px; }
+    .overlay h2      { font-size: 26px; font-weight: 700; margin-top: 10px; }
+    .overlay .sub    { color: #777; font-size: 14px; margin: 8px 0 22px; }
+    .overlay .points { color: #ffd700; font-size: 36px; font-weight: 800; margin: 6px 0 20px; }
+
+    button {
+      padding: 12px 38px;
+      background: #50c850;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button:hover { background: #3daa3d; }
+
+    .hint { color: #444; font-size: 12px; margin-top: 12px; }
+
+    /* D-pad */
+    #dpad {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    #dpad .row { display: flex; gap: 4px; }
+
+    .dkey {
+      width: 54px;
+      height: 54px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.13);
+      border-radius: 10px;
+      color: #bbb;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+    }
+    .dkey:active { background: rgba(255,255,255,0.15); }
+    .spacer { width: 54px; height: 54px; }
+  </style>
+</head>
+<body>
+  <h1>⭐ Star Snake</h1>
+  <div id="score-bar"></div>
+
+  <div id="canvas-wrap">
+    <canvas id="c"></canvas>
+
+    <div class="overlay" id="start-screen">
+      <div class="emoji">⭐</div>
+      <h2>Star Snake</h2>
+      <p class="sub">Spis stjerner · unngå veggene</p>
+      <button id="start-btn">Spill!</button>
+      <p class="hint">Piltaster · WASD · sveip · D-pad</p>
+    </div>
+
+    <div class="overlay" id="over-screen" style="display:none">
+      <div class="emoji">💫</div>
+      <h2>Game Over</h2>
+      <div class="points" id="final-score"></div>
+      <button id="retry-btn">Prøv igjen ↺</button>
+    </div>
+  </div>
+
+  <div id="dpad">
+    <div class="row"><div class="dkey" data-dir="up">▲</div></div>
+    <div class="row">
+      <div class="dkey" data-dir="left">◀</div>
+      <div class="spacer"></div>
+      <div class="dkey" data-dir="right">▶</div>
+    </div>
+    <div class="row"><div class="dkey" data-dir="down">▼</div></div>
+  </div>
+
+  <script>
+    const COLS = 22, ROWS = 18, CELL = 28;
+    const W = COLS * CELL, H = ROWS * CELL;
+
+    const canvas = document.getElementById('c');
+    canvas.width  = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    const scoreBar    = document.getElementById('score-bar');
+    const startScreen = document.getElementById('start-screen');
+    const overScreen  = document.getElementById('over-screen');
+    const finalScore  = document.getElementById('final-score');
+
+    // ── State ──────────────────────────────────────────────
+    let snake, dir, nextDir, star, score, phase;
+    // phase: 'idle' | 'running' | 'over'
+
+    function reset() {
+      snake   = [{x:11,y:9},{x:10,y:9},{x:9,y:9}];
+      dir     = {x:1, y:0};
+      nextDir = {x:1, y:0};
+      star    = randomStar();
+      score   = 0;
+      phase   = 'idle';
+      scoreBar.textContent = '';
+      startScreen.style.display = 'flex';
+      overScreen.style.display  = 'none';
+    }
+
+    function randomStar() {
+      let p;
+      do { p = {x: Math.floor(Math.random()*COLS), y: Math.floor(Math.random()*ROWS)}; }
+      while (snake.some(s => s.x===p.x && s.y===p.y));
+      return p;
+    }
+
+    function tickSpeed() { return Math.max(80, 200 - score * 6); }
+
+    // ── Game tick ──────────────────────────────────────────
+    function tick() {
+      if (phase !== 'running') return;
+      dir = { ...nextDir };
+      const nx = snake[0].x + dir.x;
+      const ny = snake[0].y + dir.y;
+
+      // Wall or self collision → game over
+      if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS || snake.some(s => s.x===nx && s.y===ny)) {
+        phase = 'over';
+        finalScore.textContent = score + (score===1 ? ' stjerne' : ' stjerner');
+        overScreen.style.display = 'flex';
+        return;
+      }
+
+      const ate = (nx === star.x && ny === star.y);
+      snake.unshift({x:nx, y:ny});
+      if (!ate) {
+        snake.pop();
+      } else {
+        score++;
+        star = randomStar();
+        scoreBar.textContent = '⭐ ' + score;
+      }
+    }
+
+    // ── Drawing ────────────────────────────────────────────
+    function rrect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x+r, y);
+      ctx.lineTo(x+w-r, y); ctx.arcTo(x+w,y, x+w,y+r, r);
+      ctx.lineTo(x+w, y+h-r); ctx.arcTo(x+w,y+h, x+w-r,y+h, r);
+      ctx.lineTo(x+r, y+h); ctx.arcTo(x,y+h, x,y+h-r, r);
+      ctx.lineTo(x, y+r); ctx.arcTo(x,y, x+r,y, r);
+      ctx.closePath();
+    }
+
+    function draw(t) {
+      // Background
+      ctx.fillStyle = '#0f0f1a';
+      ctx.fillRect(0, 0, W, H);
+
+      // Checkerboard tint
+      for (let x=0; x<COLS; x++)
+        for (let y=0; y<ROWS; y++) {
+          if ((x+y)%2===0) {
+            ctx.fillStyle = 'rgba(255,255,255,0.018)';
+            ctx.fillRect(x*CELL, y*CELL, CELL, CELL);
+          }
+        }
+
+      // Snake
+      snake.forEach((seg, i) => {
+        const isHead = i===0;
+        const alpha  = isHead ? 1 : Math.max(0.3, 1-(i/snake.length)*0.75);
+        ctx.fillStyle = isHead
+          ? 'rgba(80,200,80,1)'
+          : `rgba(55,155,55,${alpha})`;
+        const p = isHead ? 2 : 3;
+        rrect(seg.x*CELL+p, seg.y*CELL+p, CELL-p*2, CELL-p*2, isHead?7:5);
+        ctx.fill();
+
+        if (isHead) {
+          ctx.fillStyle = '#fff';
+          const ex = seg.x*CELL, ey = seg.y*CELL;
+          if      (dir.x===1)  { ctx.fillRect(ex+CELL-9,ey+7,4,4); ctx.fillRect(ex+CELL-9,ey+CELL-11,4,4); }
+          else if (dir.x===-1) { ctx.fillRect(ex+5,ey+7,4,4);      ctx.fillRect(ex+5,ey+CELL-11,4,4); }
+          else if (dir.y===-1) { ctx.fillRect(ex+7,ey+5,4,4);      ctx.fillRect(ex+CELL-11,ey+5,4,4); }
+          else                  { ctx.fillRect(ex+7,ey+CELL-9,4,4); ctx.fillRect(ex+CELL-11,ey+CELL-9,4,4); }
+        }
+      });
+
+      // Star with pulsing glow
+      const sx = star.x*CELL + CELL/2, sy = star.y*CELL + CELL/2;
+      const pulse = 0.75 + 0.25*Math.sin(t/280);
+      const glow  = ctx.createRadialGradient(sx,sy,0, sx,sy,CELL*pulse);
+      glow.addColorStop(0, `rgba(255,220,30,${0.65*pulse})`);
+      glow.addColorStop(1, 'rgba(255,200,0,0)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(sx-CELL, sy-CELL, CELL*2, CELL*2);
+      ctx.font = Math.round(CELL*0.72)+'px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('⭐', sx, sy+1);
+    }
+
+    // ── Game loop ──────────────────────────────────────────
+    let lastTick = 0;
+    function loop(t) {
+      requestAnimationFrame(loop);
+      if (phase==='running' && t-lastTick >= tickSpeed()) {
+        lastTick = t;
+        tick();
+      }
+      draw(t);
+    }
+    requestAnimationFrame(loop);
+
+    // ── Controls ───────────────────────────────────────────
+    const keyMap = {
+      ArrowUp:{x:0,y:-1}, w:{x:0,y:-1},
+      ArrowDown:{x:0,y:1}, s:{x:0,y:1},
+      ArrowLeft:{x:-1,y:0}, a:{x:-1,y:0},
+      ArrowRight:{x:1,y:0}, d:{x:1,y:0},
+    };
+    const dirMap = { up:{x:0,y:-1}, down:{x:0,y:1}, left:{x:-1,y:0}, right:{x:1,y:0} };
+
+    function steer(d) {
+      if (phase==='idle') { phase='running'; startScreen.style.display='none'; }
+      if (phase!=='running') return;
+      if (d.x !== -dir.x || d.y !== -dir.y) nextDir = d;
+    }
+
+    document.addEventListener('keydown', e => {
+      const d = keyMap[e.key];
+      if (!d) return;
+      if (e.key.startsWith('Arrow')) e.preventDefault();
+      steer(d);
+    });
+
+    // D-pad buttons
+    document.querySelectorAll('.dkey').forEach(btn => {
+      btn.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        steer(dirMap[btn.dataset.dir]);
+      });
+    });
+
+    // Touch swipe on canvas
+    let touchX, touchY;
+    canvas.addEventListener('touchstart', e => {
+      touchX = e.touches[0].clientX;
+      touchY = e.touches[0].clientY;
+    }, {passive:true});
+    canvas.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - touchX;
+      const dy = e.changedTouches[0].clientY - touchY;
+      if (Math.abs(dx)<10 && Math.abs(dy)<10) return;
+      steer(Math.abs(dx)>Math.abs(dy)
+        ? (dx>0 ? {x:1,y:0} : {x:-1,y:0})
+        : (dy>0 ? {x:0,y:1} : {x:0,y:-1}));
+    }, {passive:true});
+
+    // Buttons
+    document.getElementById('start-btn').addEventListener('click', () => {
+      phase='running'; startScreen.style.display='none';
+    });
+    document.getElementById('retry-btn').addEventListener('click', reset);
+
+    // Start!
+    reset();
+  </script>
+</body>
+</html>
