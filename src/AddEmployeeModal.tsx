@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import type { Employee } from './types';
 
 interface Props {
@@ -11,14 +11,30 @@ export default function AddEmployeeModal({ onClose, onAdd }: Props) {
   const [title, setTitle] = useState('');
   const [department, setDepartment] = useState('');
   const [photoUrl, setPhotoUrl] = useState('');
+  const [preview, setPreview] = useState('');
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const result = ev.target?.result as string;
+      setPhotoUrl(result);
+      setPreview(result);
+    };
+    reader.readAsDataURL(file);
+  }
 
   function handleSubmit() {
     if (!name.trim()) return;
+    const resolvedPhoto = photoUrl.trim() ||
+      `https://i.pravatar.cc/150?u=${encodeURIComponent(name.trim())}`;
     onAdd({
       name: name.trim(),
       title: title.trim(),
       department: department.trim(),
-      photoUrl: photoUrl.trim() || `https://i.pravatar.cc/150?u=${encodeURIComponent(name.trim())}`,
+      photoUrl: resolvedPhoto,
     });
   }
 
@@ -30,6 +46,34 @@ export default function AddEmployeeModal({ onClose, onAdd }: Props) {
           <button className="btn-close" onClick={onClose}>✕</button>
         </div>
         <div className="form">
+
+          {/* Photo picker */}
+          <div className="photo-picker">
+            <div className="photo-preview" onClick={() => fileRef.current?.click()}>
+              {preview
+                ? <img src={preview} alt="Forhåndsvisning" />
+                : <span className="photo-placeholder">📷<br/><small>Klikk for å velge bilde</small></span>
+              }
+            </div>
+            <div className="photo-actions">
+              <button className="btn-pick" onClick={() => fileRef.current?.click()}>
+                Velg bilde fra PC
+              </button>
+              {preview && (
+                <button className="btn-secondary" onClick={() => { setPhotoUrl(''); setPreview(''); }}>
+                  Fjern bilde
+                </button>
+              )}
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleFile}
+              />
+            </div>
+          </div>
+
           <label>Navn *</label>
           <input
             placeholder="Fullt navn"
@@ -50,12 +94,7 @@ export default function AddEmployeeModal({ onClose, onAdd }: Props) {
             value={department}
             onChange={(e) => setDepartment(e.target.value)}
           />
-          <label>Bilde-URL (valgfritt)</label>
-          <input
-            placeholder="https://…"
-            value={photoUrl}
-            onChange={(e) => setPhotoUrl(e.target.value)}
-          />
+
           <button className="btn-primary" onClick={handleSubmit} disabled={!name.trim()}>
             Legg til
           </button>

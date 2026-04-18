@@ -70,6 +70,12 @@ export default function App() {
     ));
   }
 
+  function updatePhoto(photoUrl: string) {
+    setEmployees((prev) => prev.map((e) =>
+      e.id === selectedId ? { ...e, photoUrl } : e
+    ));
+  }
+
   function onDropCell(row: number, col: number) {
     if (draggingId) moveEmployee(draggingId, row, col);
     setDraggingId(null);
@@ -189,6 +195,7 @@ export default function App() {
           onAddComment={addComment}
           onDeleteComment={deleteComment}
           onDeleteEmployee={() => deleteEmployee(selectedEmployee.id)}
+          onUpdatePhoto={updatePhoto}
         />
       )}
 
