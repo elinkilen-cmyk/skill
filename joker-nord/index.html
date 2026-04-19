@@ -5,480 +5,316 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Joker Nord</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #0a0a1a; color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a0a2e;color:#fff;font-family:'Segoe UI',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
+#studio{width:100%;max-width:600px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:14px}
+h1{font-size:28px;font-weight:900;color:#f59e0b;text-shadow:0 0 30px #f59e0b;letter-spacing:2px;text-align:center}
+#subtitle{font-size:13px;color:#888;text-align:center;margin-top:-10px}
 
-  #topbar {
-    background: linear-gradient(135deg, #1a1a3e, #2d1b69);
-    border-bottom: 2px solid #7c3aed;
-    padding: 10px 16px;
-    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-  }
-  #logo { font-size: 22px; font-weight: 900; color: #f59e0b; text-shadow: 0 0 20px #f59e0b; letter-spacing: 1px; white-space: nowrap; }
-  #score-box { font-size: 20px; font-weight: 700; color: #10b981; margin-left: auto; white-space: nowrap; }
-  #timer-box { font-size: 20px; font-weight: 700; color: #f87171; white-space: nowrap; }
+#prize-bar{background:rgba(255,255,255,0.07);border:1px solid #7c3aed;border-radius:12px;padding:10px 24px;text-align:center;width:100%}
+#prize-label{font-size:12px;color:#aaa}
+#prize{font-size:36px;font-weight:900;color:#10b981;text-shadow:0 0 15px #10b981}
+#round-info{font-size:12px;color:#666;margin-top:2px}
 
-  #rules-bar {
-    background: #111130;
-    padding: 6px 14px;
-    display: flex; gap: 6px; flex-wrap: wrap; min-height: 36px; align-items: center;
-  }
-  #rules-label { font-size: 11px; color: #888; white-space: nowrap; }
-  .rule-tag {
-    font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 700;
-    animation: tagpop 0.3s ease;
-  }
-  @keyframes tagpop { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+#bard-box{background:rgba(0,0,0,0.4);border:1px solid #4c1d95;border-radius:12px;padding:14px 18px;width:100%;position:relative}
+#bard-name{font-size:11px;color:#a78bfa;margin-bottom:4px;font-weight:700}
+#bard-text{font-size:15px;color:#e2e8f0;min-height:40px;line-height:1.5}
+#bard-avatar{font-size:28px;position:absolute;right:14px;top:50%;transform:translateY(-50%)}
 
-  #arena {
-    flex: 1; position: relative; overflow: hidden; cursor: crosshair;
-    background: radial-gradient(ellipse at center, #0d0d2b 0%, #050510 100%);
-  }
+#card-area{display:flex;gap:24px;align-items:center;justify-content:center;width:100%}
+.card{width:100px;height:140px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;border:3px solid rgba(255,255,255,0.2);position:relative;flex-shrink:0;transition:all 0.3s}
+.card.red{background:linear-gradient(135deg,#fff8f8,#fff);color:#dc2626;border-color:#dc2626}
+.card.black{background:linear-gradient(135deg,#f8f8ff,#fff);color:#1e1b4b;border-color:#4c1d95}
+.card.face-down{background:linear-gradient(135deg,#312e81,#1e1b4b);border-color:#7c3aed;color:transparent}
+.card.face-down::after{content:'🃏';font-size:40px;position:absolute}
+.card-value{font-size:28px;line-height:1}
+.card-suit{font-size:22px;line-height:1}
+.card-corner{position:absolute;font-size:12px;font-weight:900;line-height:1}
+.card-corner.tl{top:6px;left:8px;text-align:left}
+.card-corner.br{bottom:6px;right:8px;text-align:right;transform:rotate(180deg)}
+#arrow{font-size:32px;color:#7c3aed}
 
-  .target {
-    position: absolute; border-radius: 50%; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; font-weight: 900; user-select: none;
-    transition: transform 0.1s;
-    box-shadow: 0 0 20px currentColor;
-  }
-  .target:hover { transform: scale(1.1); }
-  .target.triple-1 { box-shadow: 0 0 10px orange, 0 0 30px orange; }
-  .target.triple-2 { box-shadow: 0 0 10px gold, 0 0 30px gold; }
+#btns{display:flex;gap:16px;width:100%}
+.choice-btn{flex:1;padding:16px;font-size:18px;font-weight:900;border:none;border-radius:12px;cursor:pointer;transition:all 0.2s;letter-spacing:1px}
+#btn-up{background:linear-gradient(135deg,#10b981,#059669);color:#fff;box-shadow:0 4px 15px rgba(16,185,129,0.4)}
+#btn-up:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 20px rgba(16,185,129,0.6)}
+#btn-down{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;box-shadow:0 4px 15px rgba(239,68,68,0.4)}
+#btn-down:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 20px rgba(239,68,68,0.6)}
+.choice-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
 
-  #overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    z-index: 100; text-align: center; padding: 20px;
-  }
-  #overlay.hidden { display: none; }
-  #overlay-icon { font-size: 64px; margin-bottom: 10px; animation: bounce 0.6s ease; }
-  @keyframes bounce { 0%,100%{transform:scale(1)} 50%{transform:scale(1.3)} }
-  #overlay-title { font-size: 36px; font-weight: 900; margin-bottom: 8px; }
-  #overlay-desc { font-size: 18px; color: #ccc; max-width: 500px; margin-bottom: 8px; }
-  #overlay-quote { font-size: 14px; color: #888; font-style: italic; max-width: 420px; margin-bottom: 20px; }
-  #overlay-btn {
-    background: #7c3aed; color: #fff; border: none; padding: 14px 40px;
-    font-size: 18px; font-weight: 700; border-radius: 8px; cursor: pointer;
-    box-shadow: 0 0 20px #7c3aed;
-  }
-  #overlay-btn:hover { background: #6d28d9; }
+#event-bar{background:rgba(124,58,237,0.15);border:1px solid #7c3aed;border-radius:8px;padding:8px 14px;width:100%;font-size:12px;color:#a78bfa;min-height:36px}
+#event-label{font-weight:700;color:#7c3aed;font-size:11px}
 
-  #rule-flash {
-    position: fixed; inset: 0; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; z-index: 90;
-    pointer-events: none; text-align: center; padding: 20px;
-  }
-  #rule-flash.hidden { display: none; }
-  #rule-flash-bg { position: absolute; inset: 0; opacity: 0.92; }
-  #rule-flash-content { position: relative; z-index: 1; }
-  #rule-flash-icon { font-size: 72px; margin-bottom: 10px; }
-  #rule-flash-title { font-size: 44px; font-weight: 900; text-shadow: 0 2px 10px rgba(0,0,0,0.5); margin-bottom: 8px; }
-  #rule-flash-desc { font-size: 20px; color: #eee; max-width: 500px; margin: 0 auto 8px; }
-  #rule-flash-quote { font-size: 14px; color: rgba(255,255,255,0.7); font-style: italic; max-width: 400px; margin: 0 auto; }
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;text-align:center;padding:24px}
+#overlay.hidden{display:none}
+#ov-icon{font-size:72px;margin-bottom:12px}
+#ov-title{font-size:32px;font-weight:900;margin-bottom:10px}
+#ov-desc{font-size:16px;color:#ccc;max-width:420px;margin-bottom:20px;line-height:1.6}
+#ov-btn{background:#7c3aed;color:#fff;border:none;padding:14px 40px;font-size:18px;font-weight:700;border-radius:10px;cursor:pointer}
+#ov-btn:hover{background:#6d28d9}
 
-  #score-pop {
-    position: fixed; font-size: 28px; font-weight: 900; pointer-events: none;
-    z-index: 50; animation: floatup 0.8s ease forwards;
-  }
-  @keyframes floatup { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-60px); } }
+#vb-overlay{position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;display:none;text-align:center;padding:24px}
+#vb-overlay.show{display:flex}
+#vb-text{font-size:48px;font-weight:900;color:#ef4444;animation:shake 0.5s infinite}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
 
-  #dpad {
-    position: fixed; bottom: 16px; right: 16px;
-    display: none; flex-direction: column; align-items: center; gap: 4px; z-index: 10;
-  }
-  .dpad-row { display: flex; gap: 4px; }
-  .dpad-btn {
-    width: 44px; height: 44px; background: rgba(124,58,237,0.7);
-    border: 1px solid #7c3aed; border-radius: 6px; color: #fff;
-    font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  }
-
-  #invert-hint {
-    position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%);
-    background: rgba(239,68,68,0.9); color: #fff; padding: 6px 18px;
-    border-radius: 20px; font-weight: 700; font-size: 13px;
-    z-index: 10; display: none;
-  }
+#rules-active{display:flex;flex-wrap:wrap;gap:6px;width:100%;min-height:28px}
+.rtag{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:700;border:1px solid}
 </style>
 </head>
 <body>
+<div id="studio">
+  <h1>🃏 JOKER NORD</h1>
+  <div id="subtitle">Med Bård Tufte Johansen</div>
 
-<div id="topbar">
-  <div id="logo">🎭 JOKER NORD</div>
-  <div id="score-box">Poeng: <span id="score">0</span></div>
-  <div id="timer-box">Tid: <span id="timer">60</span>s</div>
-</div>
+  <div id="prize-bar">
+    <div id="prize-label">GEVINST</div>
+    <div id="prize">0 kr</div>
+    <div id="round-info">Runde <span id="rnd">1</span></div>
+  </div>
 
-<div id="rules-bar">
-  <span id="rules-label">Aktive regler:</span>
-  <div id="active-rules-tags"></div>
-</div>
+  <div id="bard-box">
+    <div id="bard-name">🎤 BÅRD TUFTE JOHANSEN</div>
+    <div id="bard-text">Velkommen til Joker Nord! Er du klar, Harald?</div>
+    <div id="bard-avatar">🎭</div>
+  </div>
 
-<div id="arena"></div>
+  <div id="rules-active"></div>
 
-<div id="invert-hint">⚠️ Klikk UTENFOR sirkelen!</div>
+  <div id="card-area">
+    <div class="card face-down" id="prev-card"><div class="card-value"></div></div>
+    <div id="arrow">→</div>
+    <div class="card face-down" id="next-card"><div class="card-value"></div></div>
+  </div>
 
-<div id="overlay">
-  <div id="overlay-icon">🎭</div>
-  <div id="overlay-title">JOKER NORD</div>
-  <div id="overlay-desc">Klikk på sirklene for å samle poeng – men reglene endrer seg hele tiden!</div>
-  <div id="overlay-quote">"Regler er til for å brytes... og så endres."<br>– Harald Eia</div>
-  <button id="overlay-btn" onclick="startGame()">START SPILLET</button>
-</div>
+  <div id="btns">
+    <button class="choice-btn" id="btn-up" onclick="guess('up')" disabled>↑ HØYERE</button>
+    <button class="choice-btn" id="btn-down" onclick="guess('down')" disabled>↓ LAVERE</button>
+  </div>
 
-<div id="rule-flash" class="hidden">
-  <div id="rule-flash-bg"></div>
-  <div id="rule-flash-content">
-    <div id="rule-flash-icon"></div>
-    <div id="rule-flash-title"></div>
-    <div id="rule-flash-desc"></div>
-    <div id="rule-flash-quote"></div>
+  <div id="event-bar">
+    <div id="event-label">HENDELSE</div>
+    <div id="event-text">Ingen spesielle regler ennå.</div>
   </div>
 </div>
 
+<div id="overlay">
+  <div id="ov-icon">🃏</div>
+  <div id="ov-title">JOKER NORD</div>
+  <div id="ov-desc">Bård viser kort. Du gjetter høyere eller lavere.<br>Men reglene kan endre seg NÅR SOM HELST.<br><br>Pass deg for <strong>Vrenge bøtta</strong>.</div>
+  <button id="ov-btn" onclick="startGame()">START</button>
+</div>
+
+<div id="vb-overlay" id="vb-overlay">
+  <div id="vb-text">🪣 VRENGE BØTTA!</div>
+  <div style="font-size:20px;color:#aaa;margin-top:16px" id="vb-sub"></div>
+</div>
+
 <script>
-const arena = document.getElementById('arena');
-const scoreEl = document.getElementById('score');
-const timerEl = document.getElementById('timer');
-const activeRulesTags = document.getElementById('active-rules-tags');
-const invertHint = document.getElementById('invert-hint');
+const SUITS = ['♠','♥','♦','♣'];
+const RED_SUITS = ['♥','♦'];
+const VALUES = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 
-let score = 0;
-let timeLeft = 60;
-let targets = [];
-let activeRules = new Set();
-let gameRunning = false;
-let mainInterval = null;
-let ruleInterval = null;
-let moveInterval = null;
-let targetInterval = null;
-let tripleClicks = {};
+let deck=[], currentCard=null, prize=0, round=1;
+let reversed=false, doubleNext=false, freePass=false, rulesActive=new Set();
+let waitingForNext=false;
 
-const RULE_DEFS = [
-  {
-    id: 'double', label: '×2 Poeng', color: '#10b981', bg: '#064e3b',
-    icon: '✌️', title: 'DOBLE POENG!', desc: 'Hvert treff gir dobbelt så mange poeng!',
-    quote: '"Mer er mer." – Harald Eia', exclusive: ['quadruple', 'negative', 'half'],
-  },
-  {
-    id: 'quadruple', label: '×4 Poeng', color: '#f59e0b', bg: '#78350f',
-    icon: '💰', title: 'FIREDOBLE POENG!', desc: 'KA ER DETTE?! Firedoble poeng på alle treff!',
-    quote: '"Noen ganger er reglene bare... greie." – Harald Eia', exclusive: ['double', 'negative', 'half'],
-  },
-  {
-    id: 'negative', label: '➖ Minus-poeng', color: '#ef4444', bg: '#7f1d1d',
-    icon: '💀', title: 'MINUS-POENG!', desc: 'Hvert treff trekker nå poeng!',
-    quote: '"Dette er ikke min feil." – Harald Eia', exclusive: ['double', 'quadruple'],
-  },
-  {
-    id: 'invert', label: '🔄 Invertert klikk', color: '#8b5cf6', bg: '#2e1065',
-    icon: '🔄', title: 'INVERTERT KLIKK!', desc: 'Klikk UTENFOR sirkelen for å score!',
-    quote: '"Tenk annerledes... vent, ikke tenk i det hele tatt." – Harald Eia', exclusive: [],
-  },
-  {
-    id: 'triple', label: '3× klikk', color: '#ec4899', bg: '#831843',
-    icon: '👆', title: 'TRIPPELKLIKK!', desc: 'Du må klikke tre ganger på samme sirkel!',
-    quote: '"Tålmodighet er en dyd. Tilsynelatende." – Harald Eia', exclusive: [],
-  },
-  {
-    id: 'stealth', label: '👻 Usynlig', color: '#6b7280', bg: '#111827',
-    icon: '👻', title: 'STEALTH MODUS!', desc: 'Sirklene er nesten usynlige. Finn dem hvis du kan!',
-    quote: '"Hva? Jeg ser ingenting." – Harald Eia', exclusive: [],
-  },
-  {
-    id: 'moving', label: '🏃 Beveger seg', color: '#3b82f6', bg: '#1e3a5f',
-    icon: '🏃', title: 'BEVEGELIGE MÅL!', desc: 'Sirklene begynner å bevege seg!',
-    quote: '"Beveg deg! Eller ikke – det er opp til deg." – Harald Eia', exclusive: [],
-  },
-  {
-    id: 'fast', label: '⚡ Rask tid', color: '#fbbf24', bg: '#451a03',
-    icon: '⚡', title: 'RASKERE KLOKKE!', desc: 'Klokken tikker dobbelt så fort!',
-    quote: '"Tid er relativ, og nå er den enda mer relativ." – Harald Eia', exclusive: ['slow'],
-  },
-  {
-    id: 'slow', label: '🐌 Sakte tid', color: '#a3e635', bg: '#1a2e05',
-    icon: '🐌', title: 'SAKERE KLOKKE!', desc: 'Klokken tikker halvparten så fort. Nyt det.',
-    quote: '"Ta det med ro. Eller... nei, kanskje ikke." – Harald Eia', exclusive: ['fast'],
-  },
-  {
-    id: 'bonus', label: '🎁 +100 Bonus', color: '#f472b6', bg: '#500724',
-    icon: '🎁', title: 'GRATISPOENG!', desc: 'Du får 100 poeng bare for å være deg!',
-    quote: '"Du fortjener dette. Sannsynligvis." – Harald Eia', exclusive: [], once: true,
-  },
-  {
-    id: 'tabula', label: '🧹 Nullstill', color: '#9ca3af', bg: '#111827',
-    icon: '🧹', title: 'TABULA RASA!', desc: 'Poengene dine er slettet. Begynn på nytt.',
-    quote: '"Alt som er bygget kan rives ned." – Harald Eia', exclusive: [], once: true,
-  },
-  {
-    id: 'half', label: '✂️ Halv score', color: '#f87171', bg: '#450a0a',
-    icon: '✂️', title: 'HALV SCORE!', desc: 'Poengene dine er halvert. Beklager.',
-    quote: '"Noen ganger er halvparten nok." – Harald Eia', exclusive: ['double', 'quadruple'], once: true,
-  },
+function cardVal(c){ return VALUES.indexOf(c.value)+1; }
+function makeCard(){ return {value:VALUES[Math.floor(Math.random()*13)],suit:SUITS[Math.floor(Math.random()*4)]}; }
+
+function renderCard(el,card,hidden){
+  if(hidden){el.className='card face-down';el.innerHTML='';return;}
+  const red=RED_SUITS.includes(card.suit);
+  el.className='card '+(red?'red':'black');
+  el.innerHTML=`<div class="card-corner tl">${card.value}<br>${card.suit}</div><div class="card-value">${card.value}</div><div class="card-suit">${card.suit}</div><div class="card-corner br">${card.value}<br>${card.suit}</div>`;
+}
+
+function setBard(text,delay=0){
+  setTimeout(()=>{ document.getElementById('bard-text').textContent=text; },delay);
+}
+
+function setEvent(text){ document.getElementById('event-text').textContent=text; }
+
+function setPrize(v){
+  prize=Math.max(0,v);
+  document.getElementById('prize').textContent=prize+' kr';
+}
+
+function setBtns(enabled){
+  document.getElementById('btn-up').disabled=!enabled;
+  document.getElementById('btn-down').disabled=!enabled;
+}
+
+const BARD_CORRECT=['Riktig! Du er flink til dette, Harald.','Utrolig. Det var faktisk riktig.','Javel! Ikke verst!','Harald! Det var bra.','Korrekt. Det overrasker meg litt.'];
+const BARD_WRONG=['Feil! Klassisk Harald.','Nei nei nei...','Det var dessverre feil.','Oi. Ikke bra.','Feil igjen. Shocker.'];
+const BARD_INTRO=['La oss se hva vi har her...','Et nytt kort, Harald.','Hva tror du nå?','Interessant situasjon.','Se på det kortet der.','Hmm. Hva gjør du nå?'];
+
+const EVENTS=[
+  {id:'reversed',label:'🔄 Regler snudd',color:'#8b5cf6',borderColor:'#6d28d9',
+   announce:'REGLENE ER SNUDD! Høyere betyr lavere og lavere betyr høyere.',
+   bard:'Fra nå av er alt snudd. Høyere er lavere. Lavere er høyere. Lykke til.',
+   apply:()=>{reversed=!reversed;}},
+  {id:'double',label:'×2 Runde',color:'#10b981',borderColor:'#059669',
+   announce:'DOBLE POENG neste runde!',
+   bard:'Neste runde gir doble poeng. Du har flaks, Harald.',
+   apply:()=>{doubleNext=true;}},
+  {id:'autowin',label:'🎁 Gratis riktig',color:'#f59e0b',borderColor:'#d97706',
+   announce:'AUTOMATISK RIKTIG! Dette svaret teller uansett.',
+   bard:'Denne runden teller automatisk som riktig. Du får ikke æren.',
+   apply:()=>{freePass=true;}},
+  {id:'halve',label:'✂️ Halvering',color:'#ef4444',borderColor:'#dc2626',
+   announce:'HALVERING! Gevinsten din er nå halvert.',
+   bard:'Gevinsten er halvert. Det er reglene, Harald. Beklager.',
+   apply:()=>{setPrize(Math.floor(prize/2));}},
+  {id:'bonus',label:'🎉 +500 kr',color:'#f472b6',borderColor:'#be185d',
+   announce:'+500 KR BONUS! Bare fordi.',
+   bard:'Du får 500 kroner ekstra. Ingen grunn. Det er bare slik det er.',
+   apply:()=>{setPrize(prize+500);}},
+  {id:'vrengebotta',label:'🪣 Vrenge bøtta',color:'#6b7280',borderColor:'#374151',
+   announce:'VRENGE BØTTA! Du mister alt.',
+   bard:'Vrenge bøtta. Alt er borte. Det er Joker Nord.',
+   apply:()=>{vrengebotta();}},
+  {id:'disqualified',label:'❌ Diskvalifisert',color:'#ef4444',borderColor:'#7f1d1d',
+   announce:'DU ER DISKVALIFISERT! Ingen grunn oppgitt.',
+   bard:'Du er diskvalifisert. Det er ingen grunn til dette. Slik er det.',
+   apply:()=>{setPrize(0);}},
+  {id:'saved',label:'🛡️ Reddet',color:'#3b82f6',borderColor:'#1d4ed8',
+   announce:'DU ER REDDET fra neste Vrenge bøtta!',
+   bard:'Neste gang Vrenge bøtta slår til, er du reddet. Heldige Harald.',
+   apply:()=>{freePass=true;}},
 ];
 
-const COLORS = ['#7c3aed','#2563eb','#0891b2','#059669','#d97706','#dc2626','#db2777'];
+let shownEvent=null;
 
-function getArenaSize() {
-  return { w: arena.clientWidth, h: arena.clientHeight };
+function maybeEvent(afterGuess){
+  const r=Math.random();
+  const threshold=afterGuess?0.25:0.18;
+  if(r>threshold)return false;
+  const candidates=EVENTS.filter(e=>e.id!=='vrengebotta'||prize>0);
+  const vbW=prize>100?1.5:0;
+  const weights=candidates.map(e=>e.id==='vrengebotta'?vbW:1);
+  const total=weights.reduce((a,b)=>a+b,0);
+  let roll=Math.random()*total;
+  let chosen=candidates[0];
+  for(let i=0;i<candidates.length;i++){roll-=weights[i];if(roll<=0){chosen=candidates[i];break;}}
+  triggerEvent(chosen);
+  return true;
 }
 
-function spawnTarget() {
-  if (!gameRunning) return;
-  const { w, h } = getArenaSize();
-  const size = 48 + Math.random() * 32;
-  const x = Math.random() * (w - size);
-  const y = Math.random() * (h - size);
-  const color = COLORS[Math.floor(Math.random() * COLORS.length)];
-  const id = 'T' + Date.now() + Math.random();
-
-  const el = document.createElement('div');
-  el.className = 'target';
-  el.id = id;
-  el.style.width = size + 'px';
-  el.style.height = size + 'px';
-  el.style.left = x + 'px';
-  el.style.top = y + 'px';
-  el.style.color = color;
-  el.style.background = color + '33';
-  el.style.border = '3px solid ' + color;
-  applyTargetStyle(el);
-
-  el.addEventListener('click', (e) => { e.stopPropagation(); handleTargetClick(id, el); });
-
-  arena.appendChild(el);
-
-  const obj = { id, el, x, y, size, dx: (Math.random()-0.5)*2, dy: (Math.random()-0.5)*2, clicks: 0 };
-  targets.push(obj);
-
-  setTimeout(() => removeTarget(id), 2500 + Math.random() * 2000);
+function triggerEvent(ev){
+  shownEvent=ev;
+  setEvent(ev.announce);
+  setBard(ev.bard);
+  updateRuleTags(ev);
+  if(ev.id!=='vrengebotta')ev.apply();
 }
 
-function applyTargetStyle(el) {
-  if (activeRules.has('stealth')) {
-    el.style.opacity = '0.08';
-  } else {
-    el.style.opacity = '1';
-  }
+function updateRuleTags(newEv){
+  const bar=document.getElementById('rules-active');
+  const tag=document.createElement('span');
+  tag.className='rtag';
+  tag.style.background=newEv.color+'22';
+  tag.style.color=newEv.color;
+  tag.style.borderColor=newEv.borderColor;
+  tag.textContent=newEv.label;
+  bar.appendChild(tag);
+  if(bar.children.length>6)bar.removeChild(bar.children[0]);
 }
 
-function removeTarget(id) {
-  const idx = targets.findIndex(t => t.id === id);
-  if (idx === -1) return;
-  const t = targets[idx];
-  t.el.remove();
-  targets.splice(idx, 1);
-  delete tripleClicks[id];
-}
-
-function handleTargetClick(id, el) {
-  if (!gameRunning) return;
-
-  if (activeRules.has('triple')) {
-    tripleClicks[id] = (tripleClicks[id] || 0) + 1;
-    const n = tripleClicks[id];
-    el.className = 'target triple-' + Math.min(n, 2);
-    el.textContent = n < 3 ? n : '';
-    if (n < 3) return;
-  }
-
-  let pts = 10;
-  if (activeRules.has('quadruple')) pts *= 4;
-  else if (activeRules.has('double')) pts *= 2;
-  if (activeRules.has('negative')) pts = -Math.abs(pts);
-
-  addScore(pts, el);
-  removeTarget(id);
-}
-
-function handleArenaClick(e) {
-  if (!gameRunning) return;
-  if (!activeRules.has('invert')) return;
-  if (e.target !== arena) return;
-
-  let pts = 10;
-  if (activeRules.has('quadruple')) pts *= 4;
-  else if (activeRules.has('double')) pts *= 2;
-  addScore(pts, null, e.clientX, e.clientY);
-}
-
-arena.addEventListener('click', handleArenaClick);
-
-function addScore(pts, el, cx, cy) {
-  score = Math.max(0, score + pts);
-  scoreEl.textContent = score;
-
-  const x = cx ?? (el ? parseInt(el.style.left) + parseInt(el.style.width)/2 : arena.clientWidth/2);
-  const y = cy ?? (el ? parseInt(el.style.top) : arena.clientHeight/2);
-
-  const pop = document.createElement('div');
-  pop.id = 'score-pop';
-  pop.style.left = x + 'px';
-  pop.style.top = (y + arena.getBoundingClientRect().top - 60) + 'px';
-  pop.style.color = pts >= 0 ? '#10b981' : '#ef4444';
-  pop.textContent = (pts >= 0 ? '+' : '') + pts;
-  document.body.appendChild(pop);
-  setTimeout(() => pop.remove(), 800);
-}
-
-function updateActiveRuleTags() {
-  activeRulesTags.innerHTML = '';
-  if (activeRules.size === 0) {
-    activeRulesTags.innerHTML = '<span style="color:#555;font-size:12px">Ingen spesielle regler nå</span>';
+function vrengebotta(){
+  if(freePass){
+    freePass=false;
+    setBard('Vrenge bøtta! Men du er reddet! Denne gangen.');
+    setEvent('🛡️ Reddet fra Vrenge bøtta!');
     return;
   }
-  activeRules.forEach(id => {
-    const def = RULE_DEFS.find(r => r.id === id);
-    if (!def) return;
-    const tag = document.createElement('span');
-    tag.className = 'rule-tag';
-    tag.style.background = def.bg;
-    tag.style.color = def.color;
-    tag.style.border = '1px solid ' + def.color;
-    tag.textContent = def.label;
-    activeRulesTags.appendChild(tag);
-  });
+  const lost=prize;
+  setPrize(0);
+  const vb=document.getElementById('vb-overlay');
+  document.getElementById('vb-sub').textContent=`Du mistet ${lost} kr.`;
+  vb.classList.add('show');
+  setBtns(false);
+  setTimeout(()=>{
+    vb.classList.remove('show');
+    setBard('Det skjedde. Vrenge bøtta. Du starter på null, Harald.');
+    nextRound();
+  },2800);
 }
 
-let usedOnce = new Set();
-
-function triggerRandomRule() {
-  if (!gameRunning) return;
-
-  const available = RULE_DEFS.filter(r => {
-    if (r.once && usedOnce.has(r.id)) return false;
-    return true;
-  });
-  if (available.length === 0) return;
-
-  const def = available[Math.floor(Math.random() * available.length)];
-
-  if (def.once) usedOnce.add(def.id);
-
-  if (def.id === 'bonus') {
-    score += 100;
-    scoreEl.textContent = score;
-  } else if (def.id === 'tabula') {
-    score = 0;
-    scoreEl.textContent = score;
-  } else if (def.id === 'half') {
-    score = Math.floor(score / 2);
-    scoreEl.textContent = score;
-  }
-
-  if (!def.once) {
-    def.exclusive.forEach(eid => activeRules.delete(eid));
-
-    if (activeRules.has(def.id)) {
-      activeRules.delete(def.id);
-    } else {
-      activeRules.add(def.id);
-    }
-  }
-
-  updateActiveRuleTags();
-  applyRuleEffects();
-  showRuleFlash(def);
-}
-
-function applyRuleEffects() {
-  targets.forEach(t => applyTargetStyle(t.el));
-  invertHint.style.display = activeRules.has('invert') ? 'block' : 'none';
-}
-
-function showRuleFlash(def) {
-  const flash = document.getElementById('rule-flash');
-  const flashBg = document.getElementById('rule-flash-bg');
-  document.getElementById('rule-flash-icon').textContent = def.icon;
-  document.getElementById('rule-flash-title').textContent = def.title;
-  document.getElementById('rule-flash-desc').textContent = def.desc;
-  document.getElementById('rule-flash-quote').textContent = def.quote;
-  flashBg.style.background = def.bg;
-  flash.classList.remove('hidden');
-  setTimeout(() => flash.classList.add('hidden'), 2200);
-}
-
-function moveTargets() {
-  if (!activeRules.has('moving')) return;
-  const { w, h } = getArenaSize();
-  targets.forEach(t => {
-    t.x += t.dx * 2;
-    t.y += t.dy * 2;
-    if (t.x < 0 || t.x > w - t.size) t.dx *= -1;
-    if (t.y < 0 || t.y > h - t.size) t.dy *= -1;
-    t.x = Math.max(0, Math.min(w - t.size, t.x));
-    t.y = Math.max(0, Math.min(h - t.size, t.y));
-    t.el.style.left = t.x + 'px';
-    t.el.style.top = t.y + 'px';
-  });
-}
-
-function startGame() {
+function startGame(){
   document.getElementById('overlay').classList.add('hidden');
-  score = 0;
-  timeLeft = 60;
-  scoreEl.textContent = '0';
-  timerEl.textContent = '60';
-  activeRules.clear();
-  usedOnce.clear();
-  tripleClicks = {};
-  targets.forEach(t => t.el.remove());
-  targets = [];
-  gameRunning = true;
-  updateActiveRuleTags();
-  invertHint.style.display = 'none';
-
-  targetInterval = setInterval(spawnTarget, 900);
-  moveInterval = setInterval(moveTargets, 30);
-
-  let tickCount = 0;
-  let nextRuleTick = 8 + Math.floor(Math.random() * 6);
-
-  mainInterval = setInterval(() => {
-    const fastMult = activeRules.has('fast') ? 2 : activeRules.has('slow') ? 0.5 : 1;
-    timeLeft = Math.max(0, timeLeft - fastMult);
-    timerEl.textContent = Math.ceil(timeLeft);
-
-    tickCount++;
-    if (tickCount >= nextRuleTick) {
-      triggerRandomRule();
-      tickCount = 0;
-      nextRuleTick = 8 + Math.floor(Math.random() * 7);
-    }
-
-    if (timeLeft <= 0) endGame();
-  }, 1000);
+  prize=0;round=1;reversed=false;doubleNext=false;freePass=false;
+  document.getElementById('rnd').textContent=1;
+  document.getElementById('rules-active').innerHTML='';
+  setPrize(0);
+  currentCard=makeCard();
+  renderCard(document.getElementById('prev-card'),currentCard,false);
+  renderCard(document.getElementById('next-card'),null,true);
+  setBard('Greit. La oss begynne. '+BARD_INTRO[0]);
+  setEvent('Første runde. Ingen spesielle regler ennå.');
+  setBtns(true);
+  waitingForNext=false;
 }
 
-function endGame() {
-  gameRunning = false;
-  clearInterval(mainInterval);
-  clearInterval(targetInterval);
-  clearInterval(moveInterval);
-  targets.forEach(t => t.el.remove());
-  targets = [];
-  invertHint.style.display = 'none';
+function guess(dir){
+  if(waitingForNext)return;
+  waitingForNext=true;
+  setBtns(false);
 
-  const overlayIcon = document.getElementById('overlay-icon');
-  const overlayTitle = document.getElementById('overlay-title');
-  const overlayDesc = document.getElementById('overlay-desc');
-  const overlayQuote = document.getElementById('overlay-quote');
-  const overlayBtn = document.getElementById('overlay-btn');
+  const eventBefore=maybeEvent(false);
+  const delay=eventBefore?1800:400;
 
-  let rating = '';
-  if (score >= 500) rating = '🏆 Legendarisk!';
-  else if (score >= 300) rating = '🥇 Imponerende!';
-  else if (score >= 150) rating = '🥈 Bra jobba!';
-  else if (score >= 50) rating = '🥉 Ikke verst...';
-  else rating = '😅 Du prøvde i alle fall.';
+  setTimeout(()=>{
+    const nextCard=makeCard();
+    renderCard(document.getElementById('next-card'),nextCard,false);
 
-  overlayIcon.textContent = '🎭';
-  overlayTitle.textContent = `Spillet er over! ${rating}`;
-  overlayDesc.textContent = `Du endte opp med ${score} poeng.`;
-  overlayQuote.textContent = '"Reglene endret seg, og det gjorde du også." – Harald Eia';
-  overlayBtn.textContent = 'SPILL IGJEN';
+    const cv=cardVal(currentCard),nv=cardVal(nextCard);
+    let correct=dir==='up'?nv>cv:nv<cv;
+    if(nv===cv)correct=false;
+    if(reversed)correct=!correct;
+    if(freePass&&!eventBefore){correct=true;freePass=false;}
+
+    const gain=correct?(doubleNext?200:100):0;
+    doubleNext=false;
+
+    if(correct){
+      setPrize(prize+gain);
+      setBard(BARD_CORRECT[Math.floor(Math.random()*BARD_CORRECT.length)]+' +'+gain+' kr.');
+    } else {
+      setBard(BARD_WRONG[Math.floor(Math.random()*BARD_WRONG.length)]);
+    }
+
+    setTimeout(()=>{
+      maybeEvent(true);
+      setTimeout(()=>{
+        if(round>0&&round%7===0&&prize>=500&&Math.random()<0.15){
+          winGame();return;
+        }
+        nextRound(nextCard);
+      },eventBefore||shownEvent?1800:600);
+    },900);
+  },delay);
+}
+
+function nextRound(prevCard){
+  shownEvent=null;
+  round++;
+  document.getElementById('rnd').textContent=round;
+  currentCard=prevCard||makeCard();
+  renderCard(document.getElementById('prev-card'),currentCard,false);
+  renderCard(document.getElementById('next-card'),null,true);
+  setBard(BARD_INTRO[Math.floor(Math.random()*BARD_INTRO.length)]);
+  setBtns(true);
+  waitingForNext=false;
+}
+
+function winGame(){
   document.getElementById('overlay').classList.remove('hidden');
+  document.getElementById('ov-icon').textContent='🏆';
+  document.getElementById('ov-title').textContent='DU VANT!';
+  document.getElementById('ov-desc').textContent=`Harald! Du går hjem med ${prize} kr!\n\nDette skjer sjelden. Nyt det.`;
+  document.getElementById('ov-btn').textContent='SPILL IGJEN';
+  document.getElementById('ov-btn').onclick=startGame;
 }
 </script>
 </body>
