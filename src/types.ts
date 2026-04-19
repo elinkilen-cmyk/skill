@@ -1,3 +1,5 @@
+export type Board = 'konsulent' | 'seniorkonsulent' | 'rådgiver' | 'seniorrådgiver';
+
 export interface Comment {
   id: string;
   text: string;
@@ -11,6 +13,7 @@ export interface Employee {
   title: string;
   department: string;
   photoUrl: string;
+  board: Board;
   gridPosition: { row: number; col: number } | null;
   comments: Comment[];
 }

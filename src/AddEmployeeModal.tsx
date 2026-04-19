@@ -1,15 +1,18 @@
 import { useState, useRef } from 'react';
 import type { Employee } from './types';
+import { BOARDS } from './data';
 
 interface Props {
   onClose: () => void;
   onAdd: (employee: Omit<Employee, 'id' | 'comments' | 'gridPosition'>) => void;
+  defaultBoard?: Employee['board'];
 }
 
-export default function AddEmployeeModal({ onClose, onAdd }: Props) {
+export default function AddEmployeeModal({ onClose, onAdd, defaultBoard = 'konsulent' }: Props) {
   const [name, setName] = useState('');
   const [title, setTitle] = useState('');
   const [department, setDepartment] = useState('');
+  const [board, setBoard] = useState<Employee['board']>(defaultBoard);
   const [photoUrl, setPhotoUrl] = useState('');
   const [preview, setPreview] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
@@ -28,13 +31,12 @@ export default function AddEmployeeModal({ onClose, onAdd }: Props) {
 
   function handleSubmit() {
     if (!name.trim()) return;
-    const resolvedPhoto = photoUrl.trim() ||
-      `https://i.pravatar.cc/150?u=${encodeURIComponent(name.trim())}`;
     onAdd({
       name: name.trim(),
       title: title.trim(),
       department: department.trim(),
-      photoUrl: resolvedPhoto,
+      board,
+      photoUrl: photoUrl || `https://i.pravatar.cc/150?u=${encodeURIComponent(name.trim())}`,
     });
   }
 
@@ -46,58 +48,35 @@ export default function AddEmployeeModal({ onClose, onAdd }: Props) {
           <button className="btn-close" onClick={onClose}>✕</button>
         </div>
         <div className="form">
-
-          {/* Photo picker */}
           <div className="photo-picker">
             <div className="photo-preview" onClick={() => fileRef.current?.click()}>
               {preview
                 ? <img src={preview} alt="Forhåndsvisning" />
-                : <span className="photo-placeholder">📷<br/><small>Klikk for å velge bilde</small></span>
+                : <span className="photo-placeholder">📷<br /><small>Klikk for bilde</small></span>
               }
             </div>
             <div className="photo-actions">
-              <button className="btn-pick" onClick={() => fileRef.current?.click()}>
-                Velg bilde fra PC
-              </button>
-              {preview && (
-                <button className="btn-secondary" onClick={() => { setPhotoUrl(''); setPreview(''); }}>
-                  Fjern bilde
-                </button>
-              )}
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/*"
-                style={{ display: 'none' }}
-                onChange={handleFile}
-              />
+              <button className="btn-pick" onClick={() => fileRef.current?.click()}>Velg bilde fra PC</button>
+              {preview && <button className="btn-secondary" onClick={() => { setPhotoUrl(''); setPreview(''); }}>Fjern</button>}
+              <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
             </div>
           </div>
 
           <label>Navn *</label>
-          <input
-            placeholder="Fullt navn"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            autoFocus
-            onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-          />
-          <label>Stilling</label>
-          <input
-            placeholder="F.eks. Senior Konsulent"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-          <label>Avdeling</label>
-          <input
-            placeholder="F.eks. Strategi"
-            value={department}
-            onChange={(e) => setDepartment(e.target.value)}
-          />
+          <input placeholder="Fullt navn" value={name} onChange={(e) => setName(e.target.value)} autoFocus onKeyDown={(e) => e.key === 'Enter' && handleSubmit()} />
 
-          <button className="btn-primary" onClick={handleSubmit} disabled={!name.trim()}>
-            Legg til
-          </button>
+          <label>Stilling</label>
+          <input placeholder="F.eks. Senior Konsulent" value={title} onChange={(e) => setTitle(e.target.value)} />
+
+          <label>Avdeling</label>
+          <input placeholder="F.eks. Strategi" value={department} onChange={(e) => setDepartment(e.target.value)} />
+
+          <label>Board</label>
+          <select value={board} onChange={(e) => setBoard(e.target.value as Employee['board'])} className="form-select">
+            {BOARDS.map(b => <option key={b.id} value={b.id}>{b.label}</option>)}
+          </select>
+
+          <button className="btn-primary" onClick={handleSubmit} disabled={!name.trim()}>Legg til</button>
         </div>
       </div>
     </div>

@@ -22,6 +22,188 @@ body {
   min-height: 100vh;
 }
 
+/* ── Board tabs ── */
+.board-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.board-tab {
+  padding: 7px 14px;
+  border: 1px solid #ddd;
+  border-radius: 7px;
+  background: #fff;
+  color: #555;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.board-tab:hover { background: #f0f4ff; border-color: #b0c4e8; }
+.board-tab.active { background: #4a90d9; color: #fff; border-color: #4a90d9; }
+.board-tab.active .board-count { background: rgba(255,255,255,0.3); color: #fff; }
+
+.board-count {
+  background: #eee;
+  color: #888;
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ── View toggle ── */
+.view-toggle {
+  display: flex;
+  border: 1px solid #ddd;
+  border-radius: 7px;
+  overflow: hidden;
+}
+.view-toggle button {
+  padding: 7px 14px;
+  border: none;
+  background: #fff;
+  color: #666;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.view-toggle button + button { border-left: 1px solid #ddd; }
+.view-toggle button:hover { background: #f5f5f5; }
+.view-toggle button.active { background: #4a90d9; color: #fff; }
+.view-toggle button.active .board-count { background: rgba(255,255,255,0.3); color: #fff; }
+
+.header-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+/* ── Edit fields in CommentModal ── */
+.edit-fields { display: flex; flex-direction: column; gap: 5px; min-width: 220px; }
+.edit-input {
+  padding: 5px 9px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #222;
+}
+.edit-input:focus { outline: none; border-color: #4a90d9; }
+
+.form-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 7px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #222;
+  background: #fff;
+}
+.form-select:focus { outline: none; border-color: #4a90d9; }
+
+/* ── Comments view ── */
+.comments-view {
+  max-width: 860px;
+}
+
+.cv-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.cv-title { font-size: 22px; font-weight: 600; color: #1a1a2e; }
+.cv-meta  { font-size: 13px; color: #999; margin-top: 3px; }
+
+.cv-filter { display: flex; gap: 4px; flex-wrap: wrap; }
+
+.cv-empty { text-align: center; padding: 48px 0; color: #bbb; font-size: 15px; }
+
+.cv-list { display: flex; flex-direction: column; gap: 14px; }
+
+.cv-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.cv-card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+}
+
+.cv-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #eee;
+  flex-shrink: 0;
+}
+
+.cv-card-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+  color: #777;
+  min-width: 0;
+}
+.cv-card-info strong { font-size: 15px; color: #111; }
+
+.cv-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 3px; }
+.cv-tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+.board-tag { background: #e8f0fc; color: #4a70c8; }
+.pos-tag   { background: #f0f0f0; color: #777; }
+
+.cv-card-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.cv-count { font-size: 12px; color: #aaa; white-space: nowrap; }
+
+.cv-comments {
+  padding: 0 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cv-add-comment {
+  padding: 12px 16px 16px;
+  border-top: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cv-add-comment input,
+.cv-add-comment textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 7px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+}
+.cv-add-comment input:focus,
+.cv-add-comment textarea:focus { outline: none; border-color: #4a90d9; }
+
+/* ── Header (old styles removed/replaced) ── */
 .header {
   display: flex;
   align-items: flex-start;

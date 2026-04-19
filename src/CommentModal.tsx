@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import type { Employee, Comment } from './types';
+import { BOARDS } from './data';
 
 interface Props {
   employee: Employee;
@@ -8,6 +9,7 @@ interface Props {
   onDeleteComment: (commentId: string) => void;
   onDeleteEmployee: () => void;
   onUpdatePhoto: (photoUrl: string) => void;
+  onUpdateEmployee: (updates: Partial<Pick<Employee, 'name' | 'title' | 'department' | 'board'>>) => void;
 }
 
 function generateId() {
@@ -18,21 +20,31 @@ function avatarFallback(name: string) {
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=7c9cc0&color=fff&size=150`;
 }
 
-export default function CommentModal({ employee, onClose, onAddComment, onDeleteComment, onDeleteEmployee, onUpdatePhoto }: Props) {
+export default function CommentModal({
+  employee, onClose, onAddComment, onDeleteComment,
+  onDeleteEmployee, onUpdatePhoto, onUpdateEmployee,
+}: Props) {
   const [author, setAuthor] = useState('');
   const [text, setText] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState(employee.name);
+  const [editTitle, setEditTitle] = useState(employee.title);
+  const [editDept, setEditDept] = useState(employee.department);
+  const [editBoard, setEditBoard] = useState(employee.board);
   const fileRef = useRef<HTMLInputElement>(null);
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => {
-      const result = ev.target?.result as string;
-      onUpdatePhoto(result);
-    };
+    reader.onload = (ev) => onUpdatePhoto(ev.target?.result as string);
     reader.readAsDataURL(file);
+  }
+
+  function saveEdit() {
+    onUpdateEmployee({ name: editName.trim() || employee.name, title: editTitle.trim(), department: editDept.trim(), board: editBoard });
+    setEditing(false);
   }
 
   function handleAdd() {
@@ -60,24 +72,38 @@ export default function CommentModal({ employee, onClose, onAddComment, onDelete
                 onError={(e) => { (e.target as HTMLImageElement).src = avatarFallback(employee.name); }}
               />
               <div className="photo-edit-hint">📷</div>
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/*"
-                style={{ display: 'none' }}
-                onChange={handleFile}
-              />
+              <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
             </div>
-            <div>
-              <h2>{employee.name}</h2>
-              <p>
-                {employee.title}
-                {employee.department && <span> · {employee.department}</span>}
-              </p>
-            </div>
+
+            {editing ? (
+              <div className="edit-fields">
+                <input value={editName} onChange={e => setEditName(e.target.value)} placeholder="Navn" className="edit-input" />
+                <input value={editTitle} onChange={e => setEditTitle(e.target.value)} placeholder="Stilling" className="edit-input" />
+                <input value={editDept} onChange={e => setEditDept(e.target.value)} placeholder="Avdeling" className="edit-input" />
+                <select value={editBoard} onChange={e => setEditBoard(e.target.value as Employee['board'])} className="edit-input">
+                  {BOARDS.map(b => <option key={b.id} value={b.id}>{b.label}</option>)}
+                </select>
+                <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
+                  <button className="btn-primary" style={{ padding: '5px 14px', fontSize: 13 }} onClick={saveEdit}>Lagre</button>
+                  <button className="btn-secondary" onClick={() => setEditing(false)}>Avbryt</button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <h2>{employee.name}</h2>
+                <p>{employee.title}{employee.department && ` · ${employee.department}`}</p>
+                <p style={{ fontSize: 12, color: '#aaa', marginTop: 2 }}>
+                  {BOARDS.find(b => b.id === employee.board)?.label}
+                </p>
+              </div>
+            )}
           </div>
+
           <div className="modal-actions">
-            {confirmDelete ? (
+            {!editing && (
+              <button className="btn-secondary" onClick={() => setEditing(true)}>✏️ Rediger</button>
+            )}
+            {!editing && (confirmDelete ? (
               <>
                 <span className="confirm-text">Er du sikker?</span>
                 <button className="btn-danger" onClick={onDeleteEmployee}>Ja, slett</button>
@@ -85,7 +111,7 @@ export default function CommentModal({ employee, onClose, onAddComment, onDelete
               </>
             ) : (
               <button className="btn-delete" onClick={() => setConfirmDelete(true)}>Slett</button>
-            )}
+            ))}
             <button className="btn-close" onClick={onClose}>✕</button>
           </div>
         </div>
@@ -101,20 +127,15 @@ export default function CommentModal({ employee, onClose, onAddComment, onDelete
                   <div className="comment-header">
                     <strong>{c.author}</strong>
                     <span className="comment-date">{c.createdAt}</span>
-                    <button className="btn-delete-comment" onClick={() => onDeleteComment(c.id)} title="Slett kommentar">✕</button>
+                    <button className="btn-delete-comment" onClick={() => onDeleteComment(c.id)}>✕</button>
                   </div>
                   <p>{c.text}</p>
                 </div>
               ))
             )}
           </div>
-
           <div className="add-comment">
-            <input
-              placeholder="Ditt navn (valgfritt)"
-              value={author}
-              onChange={(e) => setAuthor(e.target.value)}
-            />
+            <input placeholder="Ditt navn (valgfritt)" value={author} onChange={(e) => setAuthor(e.target.value)} />
             <textarea
               placeholder="Skriv en kommentar…"
               value={text}
